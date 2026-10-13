@@ -19,7 +19,9 @@ const shared = {
   wechat: 'kanwar_18',
   github: 'https://github.com/SylusZephyr',
   githubHandle: 'github.com/SylusZephyr',
-  resumeUrl: '/resume.pdf',
+  // BASE_URL keeps this correct both at a domain root and under /<repo>/ on
+  // GitHub Pages — an absolute '/resume.pdf' 404s on the sub-path
+  resumeUrl: `${import.meta.env.BASE_URL}resume.pdf`,
   initials: 'WK',
 }
 

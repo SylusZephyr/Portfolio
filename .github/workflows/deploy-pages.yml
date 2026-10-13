@@ -1,0 +1,60 @@
+name: Deploy to GitHub Pages
+
+# Builds the site and publishes it to GitHub Pages.
+#
+# One-time setup: Settings → Pages → Build and deployment → Source:
+# "GitHub Actions". Without that, this workflow fails at the deploy step.
+on:
+  push:
+    branches:
+      - main
+      - claude/3d-portfolio-website-wi9a87
+  workflow_dispatch:
+
+# Vite emits relative asset URLs (base: './'), so the site works both at the
+# domain root and under /<repo>/ — no base path configuration needed here.
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Let a running deployment finish rather than cancelling it mid-publish.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run build
+
+      # GitHub Pages serves the artifact as-is; .nojekyll stops Jekyll from
+      # dropping files and folders that begin with an underscore.
+      - run: touch dist/.nojekyll
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
