@@ -5,11 +5,15 @@ name: Deploy to GitHub Pages
 # configure-pages runs with enablement: true, so the first successful run turns
 # Pages on by itself and sets the source to GitHub Actions — no manual setup in
 # repository settings.
+#
+# It runs on the default branch only: the github-pages environment rejects
+# deployments from any other branch, so running it on a feature branch can
+# only ever fail. Use workflow_dispatch to deploy a branch manually.
 on:
   push:
     branches:
+      - sylus/elegant-carson-1jg0ez
       - main
-      - claude/3d-portfolio-website-wi9a87
   workflow_dispatch:
 
 # Vite emits relative asset URLs (base: './'), so the site works both at the
