@@ -59,7 +59,7 @@ function EntryCore() {
     }
   })
   return (
-    <group ref={ref} position={[0, 5.4, -9]}>
+    <group ref={ref} position={[0, 5.4, -17]}>
       <mesh>
         <icosahedronGeometry args={[5.4, 2]} />
         <meshBasicMaterial color={PALETTE.violet} wireframe transparent opacity={0.16} />
@@ -360,7 +360,7 @@ function ContactZone({ zone }) {
           <meshStandardMaterial
             color={zone.accent}
             emissive={zone.accent}
-            emissiveIntensity={1.5}
+            emissiveIntensity={0.75}
             roughness={0.18}
             metalness={0.85}
           />
@@ -374,7 +374,7 @@ function ContactZone({ zone }) {
         {profile.email.toUpperCase()}
       </Text>
       <Hotspot position={[0, 1.0, 4.0]} color={zone.accent} onClick={() => setState({ openPanel: 'contact' })} label="Open contact card" />
-      <pointLight position={[0, 6, 3]} intensity={40} distance={30} color={zone.accent} />
+      <pointLight position={[0, 6, 3]} intensity={22} distance={30} color={zone.accent} />
     </group>
   )
 }

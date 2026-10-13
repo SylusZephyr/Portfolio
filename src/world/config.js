@@ -115,7 +115,9 @@ export const RAIL = new THREE.CatmullRomCurve3(
       mid.y += 1.1
       return [a, mid]
     }),
-    new THREE.Vector3(0, 5.0, -318),
+    // the tail must stay in FRONT of the last zone: overshooting it leaves the
+    // camera behind the contact structure, reading its text back-to-front
+    new THREE.Vector3(0, 4.4, -292),
   ],
   false,
   'catmullrom',
