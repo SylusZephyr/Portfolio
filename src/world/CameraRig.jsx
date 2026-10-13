@@ -321,7 +321,9 @@ export function useInteractKeys() {
     const onKey = (e) => {
       const s = getState()
       if (e.code === 'Escape') {
-        if (s.openPanel) setState({ openPanel: null })
+        // the help overlay is separate state from the content panels, and the
+        // panel footer promises Esc closes it — so clear both
+        if (s.openPanel || s.showHelp) setState({ openPanel: null, showHelp: false })
         else if (document.pointerLockElement) document.exitPointerLock()
         return
       }

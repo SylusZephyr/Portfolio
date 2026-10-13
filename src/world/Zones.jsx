@@ -65,9 +65,9 @@ function EntryCore() {
     }
   })
   return (
-    <group ref={ref} position={[0, 5.4, -17]}>
+    <group ref={ref} position={[0, 5.4, -30]}>
       <mesh>
-        <icosahedronGeometry args={[5.4, 2]} />
+        <icosahedronGeometry args={[6.2, 2]} />
         <meshBasicMaterial color={PALETTE.violet} wireframe transparent opacity={0.16} />
       </mesh>
       <mesh>
