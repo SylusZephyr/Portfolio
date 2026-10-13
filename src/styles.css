@@ -9,9 +9,19 @@
   --line: rgba(120, 190, 220, 0.16);
   --glass: rgba(8, 14, 26, 0.72);
   --glass-strong: rgba(6, 11, 22, 0.94);
-  --font: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  /* the CJK subset only downloads when Chinese glyphs are actually rendered */
+  --font: 'Space Grotesk', 'Noto Sans SC Subset', 'PingFang SC', 'Microsoft YaHei', system-ui, -apple-system, sans-serif;
   --mono: 'JetBrains Mono', ui-monospace, monospace;
   --radius: 14px;
+}
+
+@font-face {
+  font-family: 'Noto Sans SC Subset';
+  /* relative so the site also works when hosted under a sub-path (GitHub Pages) */
+  src: url('../fonts/noto-sans-sc-subset.ttf') format('truetype');
+  font-weight: 400 700;
+  font-display: swap;
+  unicode-range: U+2E80-9FFF, U+3000-303F, U+FF00-FFEF;
 }
 
 * { box-sizing: border-box; }
@@ -154,6 +164,13 @@ a { color: inherit; }
 }
 .ghost-btn:hover { color: var(--ink); border-color: rgba(56, 248, 212, 0.5); transform: translateY(-1px); }
 .ghost-btn.icon { width: 34px; padding: 9px 0; text-align: center; }
+
+.lang-switch button { min-width: 42px; }
+.lang-switch button.is-on {
+  background: var(--violet);
+  color: #f2f0ff;
+  box-shadow: 0 0 18px rgba(123, 108, 255, 0.45);
+}
 
 /* zone nav */
 .zone-nav {
@@ -382,6 +399,23 @@ a { color: inherit; }
 .btn.big { padding: 16px 28px; font-size: 13px; }
 .panel-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 22px; }
 
+.detail-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+.detail-list > div { display: grid; grid-template-columns: 120px 1fr; gap: 14px; align-items: baseline; }
+.detail-list span:not(.detail-key) { color: var(--ink-dim); font-size: 14px; line-height: 1.6; }
+.detail-key {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
 .fact-grid, .metric-row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
@@ -533,7 +567,21 @@ kbd {
   background: radial-gradient(circle at 50% 42%, #0a1020 0%, #04050b 70%);
   text-align: center;
 }
-.loader-inner { max-width: 520px; animation: fade-in 1s ease both; }
+.loader-inner { max-width: 560px; animation: fade-in 1s ease both; }
+.loader-langs { display: inline-flex; gap: 3px; padding: 3px; border: 1px solid var(--line); border-radius: 999px; margin-bottom: 30px; }
+.loader-langs button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--ink-faint);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  padding: 7px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.loader-langs button.is-on { background: var(--cyan); color: #04121a; }
 .loader-mark {
   width: 64px; height: 64px;
   margin: 0 auto 26px;
@@ -589,8 +637,26 @@ kbd {
 
 @media (max-width: 560px) {
   .brand-text { display: none; }
+  .detail-list > div { grid-template-columns: 1fr; gap: 3px; }
   .mode-switch button { padding: 7px 10px; }
-  .fact-grid, .metric-row { grid-template-columns: repeat(2, 1fr); }
+  .detail-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+.detail-list > div { display: grid; grid-template-columns: 120px 1fr; gap: 14px; align-items: baseline; }
+.detail-list span:not(.detail-key) { color: var(--ink-dim); font-size: 14px; line-height: 1.6; }
+.detail-key {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.fact-grid, .metric-row { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (prefers-reduced-motion: reduce) {

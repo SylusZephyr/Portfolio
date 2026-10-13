@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
-import { ZONES, zoneById } from '../world/config.js'
+import { ZONES } from '../world/config.js'
 import { frame, setState, useStore, getState } from '../store.js'
 import { travelTo, startTour, stopTour, walk } from '../world/CameraRig.jsx'
-import { profile } from '../data/portfolio.js'
+import { useContent, useUi } from '../data/useContent.js'
+import { LANGUAGES } from '../data/portfolio.js'
 
 /** Brand mark, top-left. */
 export function Brand() {
+  const { profile } = useContent()
   return (
     <div className="brand">
       <div className="brand-mark">{profile.initials}</div>
@@ -17,9 +19,38 @@ export function Brand() {
   )
 }
 
+/** EN / 中文. The choice is remembered for the next visit. */
+export function LangSwitch() {
+  const lang = useStore((s) => s.lang)
+  return (
+    <div className="mode-switch lang-switch" role="group" aria-label="Language">
+      {LANGUAGES.map((l) => (
+        <button
+          key={l.code}
+          className={lang === l.code ? 'is-on' : ''}
+          onClick={() => {
+            setState({ lang: l.code })
+            try {
+              localStorage.setItem('portfolio:lang', l.code)
+            } catch {
+              /* private mode — the choice just won't persist */
+            }
+            document.documentElement.lang = l.code === 'zh' ? 'zh-CN' : 'en'
+          }}
+          aria-pressed={lang === l.code}
+          title={l.name}
+        >
+          {l.label}
+        </button>
+      ))}
+    </div>
+  )
+}
+
 /** Zone list down the left edge. Doubles as the progress indicator. */
 export function ZoneNav() {
   const active = useStore((s) => s.activeZone)
+  const ui = useUi()
   return (
     <nav className="zone-nav" aria-label="Sections">
       {ZONES.map((z) => (
@@ -33,23 +64,25 @@ export function ZoneNav() {
           }}
         >
           <span className="dot" />
-          <span className="label">{z.nav}</span>
+          <span className="label">{ui.zones[z.id]}</span>
         </button>
       ))}
     </nav>
   )
 }
 
-/** Mode switch, tour, quality, help. */
+/** Mode switch, tour, quality, résumé, help. */
 export function Controls() {
-  // one scalar selector per value: an object selector would return a new
-  // reference every call and send useSyncExternalStore into a re-render loop
   const mode = useStore((s) => s.mode)
   const touring = useStore((s) => s.touring)
   const quality = useStore((s) => s.quality)
+  const { profile } = useContent()
+  const ui = useUi()
 
   return (
     <div className="controls">
+      <LangSwitch />
+
       <div className="mode-switch" role="group" aria-label="Navigation mode">
         <button
           className={mode === 'rail' ? 'is-on' : ''}
@@ -58,7 +91,7 @@ export function Controls() {
             window.dispatchEvent(new CustomEvent('portfolio:mode', { detail: 'rail' }))
           }}
         >
-          Scroll
+          {ui.scroll}
         </button>
         <button
           className={mode === 'free' ? 'is-on' : ''}
@@ -67,24 +100,23 @@ export function Controls() {
             window.dispatchEvent(new CustomEvent('portfolio:mode', { detail: 'free' }))
           }}
         >
-          Walk
+          {ui.walk}
         </button>
       </div>
 
       <button className="ghost-btn" onClick={() => (touring ? stopTour() : startTour())}>
-        {touring ? 'Stop tour' : 'Guided tour'}
+        {touring ? ui.tourStop : ui.tour}
       </button>
 
       <button
         className="ghost-btn"
         onClick={() => setState({ quality: quality === 'high' ? 'medium' : quality === 'medium' ? 'low' : 'high' })}
-        title="Lower this if the frame rate drops"
       >
-        Quality: {quality}
+        {ui.quality}: {quality}
       </button>
 
       <a className="ghost-btn" href={profile.resumeUrl} download>
-        Résumé ↓
+        {ui.resume} ↓
       </a>
 
       <button className="ghost-btn icon" onClick={() => setState({ showHelp: !getState().showHelp })} aria-label="Help">
@@ -125,19 +157,20 @@ export function Prompt() {
   const nearZone = useStore((s) => s.nearZone)
   const touring = useStore((s) => s.touring)
   const activeZone = useStore((s) => s.activeZone)
+  const ui = useUi()
   const isTouch = useIsTouch()
 
   let text
-  if (touring) text = 'Guided tour running — scroll or click anything to take over'
+  if (touring) text = ui.promptTour
   else if (mode === 'free' && nearZone) {
-    const z = zoneById[nearZone]
-    text = isTouch ? `Tap the marker to open ${z.nav}` : `Press E to open ${z.nav}`
-  } else if (mode === 'free') text = isTouch ? 'Drag to look · joystick to move' : 'WASD to move · drag to look · Shift to sprint'
-  else text = isTouch ? 'Swipe up to travel · tap a structure to open it' : 'Scroll to travel · click any structure to open it'
+    const name = ui.zones[nearZone]
+    text = isTouch ? ui.promptOpenTouch(name) : ui.promptOpen(name)
+  } else if (mode === 'free') text = isTouch ? ui.promptWalkTouch : ui.promptWalk
+  else text = isTouch ? ui.promptRailTouch : ui.promptRail
 
   return (
     <div className="prompt" key={text}>
-      <span className="prompt-zone">{zoneById[activeZone]?.nav}</span>
+      <span className="prompt-zone">{ui.zones[activeZone]}</span>
       <span className="prompt-text">{text}</span>
     </div>
   )
@@ -161,7 +194,6 @@ export function Joystick() {
   const isTouch = useIsTouch()
   const base = useRef()
   const knob = useRef()
-  const [, force] = useState(0)
 
   useEffect(() => {
     const el = base.current
@@ -217,7 +249,7 @@ export function Joystick() {
       el.removeEventListener('touchend', onEnd)
       el.removeEventListener('touchcancel', onEnd)
     }
-  }, [mode, isTouch, force])
+  }, [mode, isTouch])
 
   if (!isTouch || mode !== 'free' || panel) return null
   return (
@@ -232,11 +264,12 @@ export function TouchInteract() {
   const mode = useStore((s) => s.mode)
   const nearZone = useStore((s) => s.nearZone)
   const openPanel = useStore((s) => s.openPanel)
+  const ui = useUi()
   const isTouch = useIsTouch()
   if (!isTouch || mode !== 'free' || !nearZone || openPanel) return null
   return (
     <button className="touch-interact" onClick={() => setState({ openPanel: nearZone })}>
-      Open {zoneById[nearZone]?.nav}
+      {ui.open} {ui.zones[nearZone]}
     </button>
   )
 }

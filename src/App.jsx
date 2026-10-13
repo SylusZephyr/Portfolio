@@ -31,8 +31,25 @@ function useModeBridge() {
   }, [])
 }
 
+/** Restore a saved language, else follow the browser, once on mount. */
+function useLanguageInit() {
+  useEffect(() => {
+    let saved = null
+    try {
+      saved = localStorage.getItem('portfolio:lang')
+    } catch {
+      /* private mode */
+    }
+    const guess = (navigator.language || '').toLowerCase().startsWith('zh') ? 'zh' : 'en'
+    const lang = saved === 'en' || saved === 'zh' ? saved : guess
+    setState({ lang })
+    document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en'
+  }, [])
+}
+
 export default function App() {
   const loaded = useStore((s) => s.loaded)
+  useLanguageInit()
   useInteractKeys()
   useModeBridge()
 

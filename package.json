@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "font:subset": "node scripts/collect-glyphs.mjs && python3 -m fontTools.subset .fonts/noto-sans-sc.ttf --text-file=.cjk-glyphs.txt --output-file=public/fonts/noto-sans-sc-subset.ttf --layout-features= --no-hinting --desubroutinize"
   },
   "dependencies": {
     "@react-three/drei": "9.114.3",

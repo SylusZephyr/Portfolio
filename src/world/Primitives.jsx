@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { Text, Billboard } from '@react-three/drei'
+import { Billboard } from '@react-three/drei'
+import { Txt } from './Txt.jsx'
 import * as THREE from 'three'
 
 /** Wireframe shell + soft inner glow. The building block of every structure here. */
@@ -76,7 +77,7 @@ export function Beacon({ color = '#38f8d4', height = 30, radius = 0.45, opacity 
 export function FloatLabel({ children, position = [0, 0, 0], color = '#eaf6ff', size = 0.5, sub, subColor }) {
   return (
     <Billboard position={position}>
-      <Text
+      <Txt
         fontSize={size}
         color={color}
         anchorX="center"
@@ -86,9 +87,9 @@ export function FloatLabel({ children, position = [0, 0, 0], color = '#eaf6ff', 
         outlineColor="#05060c"
       >
         {children}
-      </Text>
+      </Txt>
       {sub && (
-        <Text
+        <Txt
           position={[0, -size * 1.15, 0]}
           fontSize={size * 0.42}
           color={subColor || color}
@@ -98,7 +99,7 @@ export function FloatLabel({ children, position = [0, 0, 0], color = '#eaf6ff', 
           fillOpacity={0.75}
         >
           {sub}
-        </Text>
+        </Txt>
       )}
     </Billboard>
   )

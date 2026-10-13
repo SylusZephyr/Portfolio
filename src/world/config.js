@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { projects } from '../data/portfolio.js'
+import { content, DEFAULT_LANG } from '../data/portfolio.js'
 
 export const PALETTE = {
   bg: '#05060c',
@@ -21,8 +21,6 @@ export const PALETTE = {
 export const ZONES = [
   {
     id: 'hero',
-    label: 'Entry',
-    nav: 'Home',
     accent: PALETTE.cyan,
     position: [0, 0, 0],
     anchor: [0, 3.2, 14],
@@ -32,8 +30,6 @@ export const ZONES = [
   },
   {
     id: 'about',
-    label: 'Core',
-    nav: 'About',
     accent: PALETTE.ice,
     position: [-6, 0, -46],
     anchor: [1.5, 3.4, -33],
@@ -43,8 +39,6 @@ export const ZONES = [
   },
   {
     id: 'skills',
-    label: 'Array',
-    nav: 'Skills',
     accent: PALETTE.violet,
     position: [8, 0, -92],
     anchor: [0.5, 4.2, -79],
@@ -54,8 +48,6 @@ export const ZONES = [
   },
   {
     id: 'projects',
-    label: 'Gallery',
-    nav: 'Projects',
     accent: PALETTE.magenta,
     position: [0, 0, -148],
     anchor: [0, 4.2, -124],
@@ -65,8 +57,6 @@ export const ZONES = [
   },
   {
     id: 'experience',
-    label: 'Timeline',
-    nav: 'Experience',
     accent: PALETTE.amber,
     position: [-9, 0, -210],
     anchor: [1, 3.8, -196],
@@ -75,9 +65,7 @@ export const ZONES = [
     interactive: true,
   },
   {
-    id: 'blog',
-    label: 'Signals',
-    nav: 'Writing',
+    id: 'research',
     accent: PALETTE.lime,
     position: [9, 0, -254],
     anchor: [0, 3.6, -242],
@@ -87,8 +75,6 @@ export const ZONES = [
   },
   {
     id: 'contact',
-    label: 'Beacon',
-    nav: 'Contact',
     accent: PALETTE.cyan,
     position: [0, 0, -300],
     anchor: [0, 4.0, -286],
@@ -144,18 +130,27 @@ export const ZONE_STOPS = (() => {
   })
 })()
 
-/** Project monoliths arranged as a double arc you walk between. */
-export const PROJECT_SLOTS = projects.map((p, i) => {
-  const side = i % 2 === 0 ? -1 : 1
-  const row = Math.floor(i / 2)
-  const z = -132 - row * 15
-  const x = side * (9.5 + (row % 2) * 1.6)
-  return {
-    ...p,
-    position: [x, 0, z],
-    rotation: [0, side * -0.42, 0],
-    slot: i,
-  }
-})
+/**
+ * Project monoliths arranged as a double arc you walk between. Placement is
+ * language-independent, so switching language swaps the text on a structure
+ * without moving it.
+ */
+export function projectSlots(projects) {
+  return projects.map((p, i) => {
+    const side = i % 2 === 0 ? -1 : 1
+    const row = Math.floor(i / 2)
+    const z = -132 - row * 15
+    const x = side * (9.5 + (row % 2) * 1.6)
+    return {
+      ...p,
+      position: [x, 0, z],
+      rotation: [0, side * -0.42, 0],
+      slot: i,
+    }
+  })
+}
+
+/** Default-language slots, for anything that only needs the layout. */
+export const PROJECT_SLOTS = projectSlots(content[DEFAULT_LANG].projects)
 
 export const WORLD_END = -320

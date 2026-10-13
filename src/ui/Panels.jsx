@@ -1,11 +1,12 @@
 import { useEffect } from 'react'
 import { setState, useStore } from '../store.js'
-import { about, skills, experience, education, posts, projects, profile, contact } from '../data/portfolio.js'
+import { useContent } from '../data/useContent.js'
 import { zoneById } from '../world/config.js'
 
 /* ───────────────── shell ───────────────── */
 
 function Panel({ title, kicker, accent, children, wide }) {
+  const { ui } = useContent()
   return (
     <div className={`panel${wide ? ' panel-wide' : ''}`} style={{ '--accent': accent || '#38f8d4' }}>
       <header className="panel-head">
@@ -17,7 +18,7 @@ function Panel({ title, kicker, accent, children, wide }) {
       </header>
       <div className="panel-body">{children}</div>
       <footer className="panel-foot">
-        <span>Esc to close</span>
+        <span>{ui.close}</span>
       </footer>
     </div>
   )
@@ -26,12 +27,14 @@ function Panel({ title, kicker, accent, children, wide }) {
 /* ───────────────── content ───────────────── */
 
 function AboutPanel() {
+  const { about, profile, ui } = useContent()
   return (
-    <Panel title={about.heading} kicker="Core" accent={zoneById.about.accent}>
+    <Panel title={about.heading} kicker={ui.zoneLabels.about} accent={zoneById.about.accent}>
       <p className="lead">{about.lead}</p>
       {about.paragraphs.map((p, i) => (
         <p key={i}>{p}</p>
       ))}
+
       <div className="fact-grid">
         {about.facts.map((f) => (
           <div key={f.k} className="fact">
@@ -40,12 +43,28 @@ function AboutPanel() {
           </div>
         ))}
       </div>
+
+      <div className="detail-list">
+        <div>
+          <span className="detail-key">{ui.targetRolesLabel}</span>
+          <span>{profile.targetRoles}</span>
+        </div>
+        <div>
+          <span className="detail-key">{ui.targetCitiesLabel}</span>
+          <span>{profile.targetCities}</span>
+        </div>
+        <div>
+          <span className="detail-key">{ui.availabilityLabel}</span>
+          <span>{profile.availabilityDetail}</span>
+        </div>
+      </div>
+
       <div className="panel-actions">
         <a className="btn primary" href={profile.resumeUrl} download>
-          Download résumé
+          {ui.downloadResume}
         </a>
         <a className="btn" href={`mailto:${profile.email}`}>
-          Email me
+          {ui.emailMe}
         </a>
       </div>
     </Panel>
@@ -53,9 +72,10 @@ function AboutPanel() {
 }
 
 function SkillsPanel() {
+  const { skills, ui } = useContent()
   return (
-    <Panel title="Skills" kicker="Array" accent={zoneById.skills.accent} wide>
-      <p className="lead">Self-assessed fluency. Anything under 70 means I can work in it, not teach it.</p>
+    <Panel title={ui.zones.skills} kicker={ui.zoneLabels.skills} accent={zoneById.skills.accent} wide>
+      <p className="lead">{ui.skillsNote}</p>
       <div className="skill-cols">
         {skills.map((g) => (
           <section key={g.group} style={{ '--accent': g.accent }}>
@@ -77,8 +97,9 @@ function SkillsPanel() {
 }
 
 function ExperiencePanel() {
+  const { experience, education, profile, ui } = useContent()
   return (
-    <Panel title="Experience" kicker="Timeline" accent={zoneById.experience.accent} wide>
+    <Panel title={ui.zones.experience} kicker={ui.zoneLabels.experience} accent={zoneById.experience.accent} wide>
       <div className="timeline">
         {experience.map((job) => (
           <article key={job.company} style={{ '--accent': job.accent }}>
@@ -98,7 +119,8 @@ function ExperiencePanel() {
           </article>
         ))}
       </div>
-      <h3 className="section-split">Education & certifications</h3>
+
+      <h3 className="section-split">{ui.educationHeading}</h3>
       <div className="edu-grid">
         {education.map((e) => (
           <div key={e.credential} className="edu">
@@ -110,25 +132,27 @@ function ExperiencePanel() {
           </div>
         ))}
       </div>
+
       <div className="panel-actions">
         <a className="btn primary" href={profile.resumeUrl} download>
-          Download résumé (PDF)
+          {ui.downloadResumePdf}
         </a>
       </div>
     </Panel>
   )
 }
 
-function BlogPanel() {
+function ResearchPanel() {
+  const { research, ui } = useContent()
   return (
-    <Panel title="Writing" kicker="Signals" accent={zoneById.blog.accent} wide>
-      <p className="lead">Mostly post-mortems of my own mistakes, which are the only posts worth reading.</p>
+    <Panel title={research.heading} kicker={ui.zoneLabels.research} accent={zoneById.research.accent} wide>
+      <p className="lead">{research.lead}</p>
       <div className="post-list">
-        {posts.map((p) => (
-          <a key={p.title} className="post" href={p.url}>
+        {research.items.map((p) => (
+          <article key={p.title} className="post">
             <div className="post-meta">
               <span>{p.date}</span>
-              <span>{p.readingTime}</span>
+              <span>{p.kind}</span>
             </div>
             <h3>{p.title}</h3>
             <p>{p.excerpt}</p>
@@ -139,7 +163,7 @@ function BlogPanel() {
                 </span>
               ))}
             </div>
-          </a>
+          </article>
         ))}
       </div>
     </Panel>
@@ -147,8 +171,9 @@ function BlogPanel() {
 }
 
 function ContactPanel() {
+  const { contact, profile, ui } = useContent()
   return (
-    <Panel title={contact.heading} kicker="Beacon" accent={zoneById.contact.accent}>
+    <Panel title={contact.heading} kicker={ui.zoneLabels.contact} accent={zoneById.contact.accent}>
       <p className="lead">{contact.lead}</p>
       {profile.available && (
         <div className="availability">
@@ -157,20 +182,28 @@ function ContactPanel() {
       )}
       <div className="social-list">
         {profile.socials.map((s) => (
-          <a key={s.label} href={s.url} target="_blank" rel="noreferrer noopener" className="social">
+          <a
+            key={s.label}
+            href={s.url}
+            target={s.url.startsWith('http') ? '_blank' : undefined}
+            rel="noreferrer noopener"
+            className="social"
+          >
             <span className="social-label">{s.label}</span>
             <span className="social-handle">{s.handle}</span>
             <span className="social-arrow">↗</span>
           </a>
         ))}
       </div>
-      <p className="muted">{contact.responseTime} · {profile.location}</p>
+      <p className="muted">
+        {contact.responseTime} · {profile.location}
+      </p>
       <div className="panel-actions">
         <a className="btn primary" href={`mailto:${profile.email}`}>
-          Start an email
+          {ui.startEmail}
         </a>
         <a className="btn" href={profile.resumeUrl} download>
-          Résumé
+          {ui.resume}
         </a>
       </div>
     </Panel>
@@ -178,6 +211,7 @@ function ContactPanel() {
 }
 
 function ProjectPanel({ id }) {
+  const { projects, ui } = useContent()
   const p = projects.find((x) => x.id === id)
   if (!p) return null
   return (
@@ -195,15 +229,15 @@ function ProjectPanel({ id }) {
 
       <div className="case">
         <section>
-          <h3>The problem</h3>
+          <h3>{ui.problem}</h3>
           <p>{p.problem}</p>
         </section>
         <section>
-          <h3>What I did</h3>
+          <h3>{ui.approach}</h3>
           <p>{p.approach}</p>
         </section>
         <section>
-          <h3>Outcome</h3>
+          <h3>{ui.outcomeLabel}</h3>
           <ul>
             {p.outcome.map((o, i) => (
               <li key={i}>{o}</li>
@@ -220,13 +254,15 @@ function ProjectPanel({ id }) {
         ))}
       </div>
 
-      <div className="panel-actions">
-        {p.links.map((l) => (
-          <a key={l.label} className="btn" href={l.url} target="_blank" rel="noreferrer noopener">
-            {l.label} ↗
-          </a>
-        ))}
-      </div>
+      {p.links.length > 0 && (
+        <div className="panel-actions">
+          {p.links.map((l) => (
+            <a key={l.label} className="btn" href={l.url} target="_blank" rel="noreferrer noopener">
+              {l.label} ↗
+            </a>
+          ))}
+        </div>
+      )}
 
       <div className="project-switch">
         {projects
@@ -242,43 +278,27 @@ function ProjectPanel({ id }) {
 }
 
 function HelpPanel() {
+  const { ui } = useContent()
+  const h = ui.help
+  const cols = [
+    { title: h.railTitle, items: h.railItems },
+    { title: h.walkTitle, items: h.walkItems },
+    { title: h.anyTitle, items: h.anyItems },
+    { title: h.touchTitle, items: h.touchItems },
+  ]
   return (
-    <Panel title="How to get around" kicker="Controls" accent="#7b6cff">
+    <Panel title={h.title} kicker={h.kicker} accent="#7b6cff">
       <div className="help-grid">
-        <div>
-          <h3>Scroll mode</h3>
-          <ul>
-            <li><kbd>Scroll</kbd> / <kbd>↑</kbd><kbd>↓</kbd> travel the path</li>
-            <li>Click a structure to open it</li>
-            <li>Click the left-hand nav to jump</li>
-          </ul>
-        </div>
-        <div>
-          <h3>Walk mode</h3>
-          <ul>
-            <li><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> move</li>
-            <li>Drag the mouse to look</li>
-            <li><kbd>Shift</kbd> sprint</li>
-            <li><kbd>E</kbd> open what you're next to</li>
-          </ul>
-        </div>
-        <div>
-          <h3>Anywhere</h3>
-          <ul>
-            <li><kbd>Esc</kbd> close a panel</li>
-            <li><kbd>?</kbd> this help</li>
-            <li>Guided tour flies you through everything</li>
-            <li>Drop Quality if the frame rate dips</li>
-          </ul>
-        </div>
-        <div>
-          <h3>On a phone</h3>
-          <ul>
-            <li>Swipe to travel</li>
-            <li>Walk mode gives you a joystick</li>
-            <li>Tap structures to open them</li>
-          </ul>
-        </div>
+        {cols.map((c) => (
+          <div key={c.title}>
+            <h3>{c.title}</h3>
+            <ul>
+              {c.items.map((it) => (
+                <li key={it}>{it}</li>
+              ))}
+            </ul>
+          </div>
+        ))}
       </div>
     </Panel>
   )
@@ -290,7 +310,7 @@ const PANELS = {
   about: AboutPanel,
   skills: SkillsPanel,
   experience: ExperiencePanel,
-  blog: BlogPanel,
+  research: ResearchPanel,
   contact: ContactPanel,
 }
 
@@ -298,7 +318,6 @@ export function PanelLayer() {
   const openPanel = useStore((s) => s.openPanel)
   const showHelp = useStore((s) => s.showHelp)
 
-  // lock page scroll chaining while a panel is open
   useEffect(() => {
     document.body.classList.toggle('panel-open', Boolean(openPanel || showHelp))
   }, [openPanel, showHelp])

@@ -1,9 +1,10 @@
 import { useRef, useState, useMemo } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { Text } from '@react-three/drei'
+import { Txt } from './Txt.jsx'
 import * as THREE from 'three'
 import { NeonBox, GlowRing } from './Primitives.jsx'
 import { setState } from '../store.js'
+import { useContent } from '../data/useContent.js'
 
 /** Each project gets a different silhouette so the gallery reads as varied, not repeated. */
 function Form({ shape, color, hover }) {
@@ -103,6 +104,7 @@ function ScanBar({ color }) {
 }
 
 export function Monolith({ project, dimmed }) {
+  const { ui } = useContent()
   const [hover, setHover] = useState(false)
   const group = useRef()
   const baseY = useMemo(() => Math.random() * Math.PI * 2, [])
@@ -139,7 +141,7 @@ export function Monolith({ project, dimmed }) {
 
         <Form shape={project.shape} color={project.accent} hover={hover} />
 
-        <Text
+        <Txt
           position={[0, 0.9, 2.3]}
           fontSize={0.62}
           color="#f2faff"
@@ -147,11 +149,11 @@ export function Monolith({ project, dimmed }) {
           anchorY="middle"
           outlineWidth={0.006}
           outlineColor="#05060c"
-          maxWidth={6}
+          maxWidth={7}
         >
           {project.title}
-        </Text>
-        <Text
+        </Txt>
+        <Txt
           position={[0, 0.42, 2.3]}
           fontSize={0.23}
           color={project.accent}
@@ -159,9 +161,9 @@ export function Monolith({ project, dimmed }) {
           anchorY="middle"
           letterSpacing={0.14}
         >
-          {project.kind.toUpperCase()}
-        </Text>
-        <Text
+          {project.kind}
+        </Txt>
+        <Txt
           position={[0, 10.1, 0]}
           fontSize={0.3}
           color={project.accent}
@@ -170,23 +172,23 @@ export function Monolith({ project, dimmed }) {
           fillOpacity={0.6}
         >
           {project.year}
-        </Text>
+        </Txt>
       </group>
 
       <GlowRing radius={3.5} color={project.accent} opacity={hover ? 1 : dimmed ? 0.3 : 0.6} speed={hover ? 0.9 : 0.25} />
       <pointLight position={[0, 3, 1.5]} intensity={hover ? 26 : 12} distance={16} color={project.accent} />
 
       {hover && (
-        <Text
+        <Txt
           position={[0, -0.25, 3.0]}
           fontSize={0.2}
           color="#9fb6c9"
           anchorX="center"
           anchorY="middle"
-          letterSpacing={0.2}
+          letterSpacing={0.16}
         >
-          CLICK TO OPEN CASE STUDY
-        </Text>
+          {ui.clickToOpen}
+        </Txt>
       )}
     </group>
   )

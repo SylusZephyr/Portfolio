@@ -1,9 +1,12 @@
 import { useSyncExternalStore } from 'react'
+import { DEFAULT_LANG } from './data/portfolio.js'
 
 /** Minimal external store — avoids a state-management dependency. */
 const listeners = new Set()
 
 let state = {
+  /** active language code: 'en' | 'zh'. */
+  lang: DEFAULT_LANG,
   /** 'rail' = scroll drives the camera along a fixed path. 'free' = WASD / joystick. */
   mode: 'rail',
   /** 0..1 progress along the camera rail. */

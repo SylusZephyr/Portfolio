@@ -1,13 +1,16 @@
 import { useEffect, useState } from 'react'
 import { useProgress } from '@react-three/drei'
 import { setState, useStore } from '../store.js'
-import { profile } from '../data/portfolio.js'
+import { useContent } from '../data/useContent.js'
+import { LANGUAGES } from '../data/portfolio.js'
 
 /**
  * Entry screen. Holds until assets are ready, then waits for a deliberate click —
  * a 3D world that starts moving before the visitor is ready feels broken.
  */
 export function Loader() {
+  const { profile, ui } = useContent()
+  const lang = useStore((s) => s.lang)
   const { progress, active } = useProgress()
   const loaded = useStore((s) => s.loaded)
   const [ready, setReady] = useState(false)
@@ -46,9 +49,29 @@ export function Loader() {
   return (
     <div className={`loader${ready ? ' is-ready' : ''}`}>
       <div className="loader-inner">
+        <div className="loader-langs">
+          {LANGUAGES.map((l) => (
+            <button
+              key={l.code}
+              className={lang === l.code ? 'is-on' : ''}
+              onClick={() => {
+                setState({ lang: l.code })
+                try {
+                  localStorage.setItem('portfolio:lang', l.code)
+                } catch {
+                  /* private mode — the choice just won't persist */
+                }
+                document.documentElement.lang = l.code === 'zh' ? 'zh-CN' : 'en'
+              }}
+            >
+              {l.label}
+            </button>
+          ))}
+        </div>
+
         <div className="loader-mark">{profile.initials}</div>
         <h1>{profile.name}</h1>
-        <p className="loader-role">{profile.role}</p>
+        <p className="loader-role">{profile.roleLong}</p>
         <p className="loader-tag">{profile.tagline}</p>
 
         <div className="loader-bar">
@@ -57,15 +80,15 @@ export function Loader() {
 
         {ready ? (
           <button className="btn primary big" onClick={() => setState({ loaded: true })}>
-            Enter the world
+            {ui.enter}
           </button>
         ) : (
-          <p className="loader-status">Building the world… {Math.round(shown)}%</p>
+          <p className="loader-status">
+            {ui.building} {Math.round(shown)}%
+          </p>
         )}
 
-        <p className="loader-note">
-          Best with sound off and a keyboard. Works on a phone too — there's a joystick.
-        </p>
+        <p className="loader-note">{ui.loaderNote}</p>
       </div>
     </div>
   )
