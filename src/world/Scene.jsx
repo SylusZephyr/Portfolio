@@ -66,10 +66,21 @@ export function Scene() {
       }}
     >
       <Lighting />
-      <Stars radius={260} depth={90} count={quality === 'low' ? 900 : 3200} factor={5} saturation={0} fade speed={0.35} />
+      <Stars
+        key={`stars-${quality}`}
+        radius={260}
+        depth={90}
+        count={quality === 'low' ? 900 : 3200}
+        factor={5}
+        saturation={0}
+        fade
+        speed={0.35}
+      />
       <BasePlane />
       <GridFloor />
-      {quality !== 'low' && <Dust count={quality === 'high' ? 900 : 380} />}
+      {/* keyed on quality: the particle count changes with it, and a buffer
+          attribute cannot be resized in place — it has to remount */}
+      {quality !== 'low' && <Dust key={quality} count={quality === 'high' ? 900 : 380} />}
       <Pillars />
 
       <Suspense fallback={null}>
