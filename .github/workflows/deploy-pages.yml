@@ -2,8 +2,9 @@ name: Deploy to GitHub Pages
 
 # Builds the site and publishes it to GitHub Pages.
 #
-# One-time setup: Settings → Pages → Build and deployment → Source:
-# "GitHub Actions". Without that, this workflow fails at the deploy step.
+# configure-pages runs with enablement: true, so the first successful run turns
+# Pages on by itself and sets the source to GitHub Actions — no manual setup in
+# repository settings.
 on:
   push:
     branches:
@@ -44,6 +45,10 @@ jobs:
       - run: touch dist/.nojekyll
 
       - uses: actions/configure-pages@v5
+        with:
+          # create the Pages site on the first run rather than failing when it
+          # does not exist yet
+          enablement: true
 
       - uses: actions/upload-pages-artifact@v3
         with:
