@@ -42,7 +42,11 @@ export function ZoneNav() {
 
 /** Mode switch, tour, quality, help. */
 export function Controls() {
-  const { mode, touring, quality } = useStore((s) => ({ mode: s.mode, touring: s.touring, quality: s.quality }))
+  // one scalar selector per value: an object selector would return a new
+  // reference every call and send useSyncExternalStore into a re-render loop
+  const mode = useStore((s) => s.mode)
+  const touring = useStore((s) => s.touring)
+  const quality = useStore((s) => s.quality)
 
   return (
     <div className="controls">
@@ -117,12 +121,10 @@ export function RailProgress() {
 
 /** Contextual prompt: what to do right now. */
 export function Prompt() {
-  const { mode, nearZone, touring, activeZone } = useStore((s) => ({
-    mode: s.mode,
-    nearZone: s.nearZone,
-    touring: s.touring,
-    activeZone: s.activeZone,
-  }))
+  const mode = useStore((s) => s.mode)
+  const nearZone = useStore((s) => s.nearZone)
+  const touring = useStore((s) => s.touring)
+  const activeZone = useStore((s) => s.activeZone)
   const isTouch = useIsTouch()
 
   let text
@@ -227,7 +229,9 @@ export function Joystick() {
 
 /** Big "open this zone" button on touch, replacing the E key. */
 export function TouchInteract() {
-  const { mode, nearZone, openPanel } = useStore((s) => ({ mode: s.mode, nearZone: s.nearZone, openPanel: s.openPanel }))
+  const mode = useStore((s) => s.mode)
+  const nearZone = useStore((s) => s.nearZone)
+  const openPanel = useStore((s) => s.openPanel)
   const isTouch = useIsTouch()
   if (!isTouch || mode !== 'free' || !nearZone || openPanel) return null
   return (
