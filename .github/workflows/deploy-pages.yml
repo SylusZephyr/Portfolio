@@ -1,0 +1,72 @@
+name: Deploy to GitHub Pages
+
+# Builds the site and publishes it to GitHub Pages.
+#
+# configure-pages runs with enablement: true, so the first successful run turns
+# Pages on by itself and sets the source to GitHub Actions — no manual setup in
+# repository settings.
+#
+# It runs on the default branch only: the github-pages environment rejects
+# deployments from any other branch, so running it on a feature branch can
+# only ever fail. Use workflow_dispatch to deploy a branch manually.
+on:
+  push:
+    branches:
+      - sylus/elegant-carson-1jg0ez
+      - main
+  workflow_dispatch:
+
+# Vite emits relative asset URLs (base: './'), so the site works both at the
+# domain root and under /<repo>/ — no base path configuration needed here.
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Let a running deployment finish rather than cancelling it mid-publish.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run build
+        env:
+          # GitHub Pages serves this repo under /Portfolio
+          BASE_PATH: /Portfolio
+
+      # Next writes its chunks to _next/, and Jekyll drops paths that begin
+      # with an underscore unless .nojekyll is present.
+      - run: touch out/.nojekyll
+
+      - uses: actions/configure-pages@v5
+        with:
+          # create the Pages site on the first run rather than failing when it
+          # does not exist yet
+          enablement: true
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
