@@ -1,154 +1,96 @@
-# Wajid Kanwar Abdul — interactive 3D portfolio
+# Wajid Kanwar Abdul 万吉 — portfolio
 
-A bilingual (English / 中文) single-page portfolio you *walk through*. Seven zones
-laid out in a neon-cyber space — entry, about, skills, a project gallery, an
-experience timeline, awards & research, and contact — connected by a camera path
-you can either scroll along or leave to roam on foot.
+A bilingual (English / 简体中文) portfolio site for an AI full-stack engineer.
+Dark, dense, animated: spotlight hero, bento grid, pointer-tracking project
+cards with full case studies, an animated experience rail, skill meters that
+fill on scroll, and a contact block with one-tap copy for every channel.
 
-All content comes from the CV: AI full-stack engineering, edge AI, large-model
-applications and AI governance.
+**Live:** https://syluszephyr.github.io/Portfolio/
+
+## Stack
+
+| | |
+| --- | --- |
+| Framework | Next.js 16 (App Router, static export) |
+| Styling | Tailwind CSS 4 — tokens live in `app/globals.css` under `@theme` |
+| Animation | Motion (Framer Motion v12) |
+| Icons | lucide-react |
+| Hosting | GitHub Pages, deployed by Actions |
+
+No WebGL, no canvas, no 3D runtime. Every effect is CSS, SVG or a transform
+driven by a motion value, so the site renders identically on a four-year-old
+laptop and never drops frames on integrated graphics.
 
 ## Running it
 
 ```bash
 npm install
-npm run dev      # http://localhost:5173
-npm run build    # static output in dist/
-npm run preview  # serve the build locally
+npm run dev     # http://localhost:3000
+npm run build   # static site in out/
 ```
 
-Node 18+ required. The build is fully static — `dist/` drops onto GitHub Pages,
-Netlify, Vercel or any file host with no server-side piece.
+Node 20+. `npm run build` writes a fully static `out/` — no server needed.
 
 ## Editing the content
 
-**Everything lives in one file: `src/data/portfolio.js`.** It exports
-`content.en` and `content.zh`, which have the *exact same shape* — so every edit
-is made twice, once per language, side by side.
+**All copy lives in two files that share one shape:** `content/en.ts` and
+`content/zh.ts`, typed by `content/types.ts`. TypeScript will tell you if the
+two languages drift apart, so a change made in one language cannot be forgotten
+in the other.
 
 | What | Where |
 | --- | --- |
-| Name, role, tagline, contact details, target roles/cities, availability | `profile` |
-| About copy and the stat shards orbiting the core | `about` |
-| Skill groups, levels and their accent colours | `skills` |
-| Projects — one entry per monolith in the gallery | `projects` |
-| Internship, media and university roles on the timeline | `experience` |
-| Degree, course results, languages | `education` |
-| Competition awards and the AI governance report | `research` |
-| Contact panel copy | `contact` |
-| Every interface string — buttons, prompts, help | `ui` |
+| Name, role, contact details, target roles and cities | `profile` |
+| Hero eyebrow, headline, sub-heading, the four stat tiles | `hero` |
+| Bento cards, the five-step chain, the pull quote | `about` |
+| Projects — one card plus one full case study each | `projects.items` |
+| Jobs and media work on the timeline | `experience.items` |
+| Skill groups and self-assessed levels | `skills.groups` |
+| Competition awards and the governance report | `awards.items` |
+| Degree, course results, languages | `awards.education` |
+| Contact copy and footer | `contact`, `footer` |
 
-Accent colours are defined once in the `ACCENT` map at the top and shared across
-both languages, so switching language changes the words and nothing else.
+Adding a language: copy either file, translate it, and register it in
+`content/index.ts` and `LANGUAGES`. Nothing else needs to know it exists.
 
-### Adding a third language
+Chinese text uses the system CJK stack (PingFang SC, Microsoft YaHei, Noto Sans
+CJK) rather than a downloaded webfont, so Chinese visitors pay no font cost.
 
-Copy either block, translate it, and add an entry to `LANGUAGES`. Nothing else
-in the codebase needs to know the language exists.
-
-### Chinese text in 3D
-
-troika (what the 3D text renderer uses) ships a Latin-only font, so Chinese would
-render as empty boxes. `public/fonts/noto-sans-sc-subset.ttf` is Noto Sans SC cut
-down to exactly the characters the Chinese content uses — 170kB instead of 10MB —
-and it is only fetched when Chinese is selected.
-
-After editing Chinese copy, rebuild that subset so any new characters are
-included:
-
-```bash
-# one-time: pip install fonttools brotli, and put the full face at
-# .fonts/noto-sans-sc.ttf (from fonts.google.com/noto/specimen/Noto+Sans+SC)
-npm run font:subset
-```
-
-If a character shows as a blank box, it is missing from the subset — that command
-is the fix.
-
-Two things to know when editing projects:
-
-- `shape` picks the 3D form of that project's monolith: `'slab'`, `'tower'`,
-  `'ring'` or `'shard'`. Mixing them is what keeps the gallery from looking
-  repetitive.
-- `accent` drives that monolith's emissive colour, its pedestal ring, its light
-  and the accent of its case-study panel.
-
-Add or remove projects freely — the gallery arranges itself into a double arc in
-`src/world/config.js` (`PROJECT_SLOTS`), so nothing needs to be repositioned by
-hand.
-
-Drop the real `resume.pdf` into `public/` to make the Résumé buttons work — the
-file there now is a placeholder.
-
-## Navigation
-
-Two modes, switchable at any time from the top-right toggle, and the hand-off
-keeps your position either way.
-
-The language toggle (EN / 中文) sits top-right and on the entry screen. The choice
-is remembered in `localStorage`; first-time visitors with a Chinese browser
-locale get Chinese automatically.
-
-**Scroll mode** (default) — the camera rides a Catmull-Rom spline through every
-zone. Scroll, swipe, or press <kbd>↑</kbd>/<kbd>↓</kbd> to travel; clicking a
-zone in the left nav flies you there; "Guided tour" runs the whole path on its
-own and bails out the moment you touch anything.
-
-**Walk mode** — <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> to move, drag
-to look, <kbd>Shift</kbd> to sprint, <kbd>E</kbd> to open whatever you're
-standing next to. On touch devices you get a virtual joystick and a large
-"Open <zone>" button instead.
-
-<kbd>Esc</kbd> closes a panel, <kbd>?</kbd> opens the controls help.
+Drop a new `public/resume.pdf` to replace the downloadable CV.
 
 ## Structure
 
 ```
-src/
-  data/portfolio.js   all content, both languages — the only file a content
-                      change touches
-  data/useContent.js  hook returning the active language's content tree
-  store.js            tiny external store (no state library); per-frame values
-                      bypass React entirely via the `frame` object
-  world/
-    config.js         zone layout, the camera rail, project placement, palette
-    Scene.jsx         the Canvas: renderer settings, fog, post-processing
-    CameraRig.jsx     both navigation modes, input handling, zone proximity
-    Environment.jsx   shader grid floor, dust, light pillars, lighting
-    Primitives.jsx    reusable neon building blocks
-    Monolith.jsx      a project structure, one per `projects` entry
-    Zones.jsx         each zone's 3D contents, assembled into `<World/>`
-    Txt.jsx           <Text> wrapper that swaps in the CJK font for Chinese
-  ui/
-    Hud.jsx           brand, zone nav, mode switch, prompts, joystick
-    Panels.jsx        the overlay panels and case studies
-    Loader.jsx        entry screen, gated on asset load
-  styles.css          all UI styling
+app/
+  layout.tsx          fonts, metadata, language provider
+  page.tsx            section order
+  globals.css         design tokens, keyframes, utilities
+components/
+  ui/                 Nav, Spotlight, TiltCard, Marquee, MagicButton,
+                      Reveal, SectionHeading, ScrollProgress
+  sections/           Hero, About, Work, Experience, Skills, Awards, Contact
+content/              en.ts, zh.ts, types.ts — the only files copy lives in
+lib/
+  i18n.tsx            language context, persistence, browser-locale default
+  utils.ts            cn() and asset() for the Pages base path
 ```
 
-## Performance notes
+## Deployment
 
-The world is built to hold 60fps on ordinary hardware rather than to look good
-only on a workstation:
+`.github/workflows/deploy-pages.yml` builds and publishes on every push to the
+default branch. `configure-pages` runs with `enablement: true`, so the first run
+turns Pages on by itself.
 
-- The grid floor is one shader-drawn plane, not line geometry — one draw call for
-  the entire floor, with distance fade and a travelling scan pulse for free.
-- Per-frame values (camera progress, proximity) are written to a plain object and
-  never to React state, so the render loop triggers no re-renders.
-- Post-processing is the dominant cost, so the Quality control steps it down:
-  **high** = bloom + chromatic aberration + MSAA, **medium** = bloom only,
-  **low** = no effects, reduced DPR, fewer stars, no dust.
-- `AdaptiveDpr` drops resolution automatically when frame times slip.
+The site is served from `/Portfolio`, not a domain root, so `next.config.ts`
+sets `basePath` and `lib/utils.ts#asset()` prefixes anything referenced by hand
+(the résumé PDF). Build for a domain root with `BASE_PATH= npm run build`.
 
-If the frame rate dips on your machine, the Quality button in the top-right is
-the first thing to reach for.
+## Accessibility and performance
 
-## Accessibility and fallbacks
-
-- The entry screen waits for a deliberate click, so nothing moves before the
-  visitor is ready.
-- `prefers-reduced-motion` disables UI animation and transitions.
-- Every zone's content is also reachable as flat, scrollable, text-first panels —
-  the 3D is the way in, not the only way to read it.
-- Scroll mode means the whole portfolio is navigable without ever learning WASD.
-- `<html lang>` follows the selected language, so screen readers switch voice.
+- Fully static: no client-side data fetching, no layout shift from it.
+- `prefers-reduced-motion` disables every animation and smooth scrolling.
+- Language choice drives `<html lang>`, so screen readers switch voice.
+- The case-study dialog traps page scroll, closes on <kbd>Esc</kbd> and on
+  backdrop click, and is labelled for assistive tech.
+- Nav highlights the section in view via `IntersectionObserver` rather than
+  scroll maths, and hides on scroll-down so it never covers the content.

@@ -43,10 +43,13 @@ jobs:
       - run: npm ci
 
       - run: npm run build
+        env:
+          # GitHub Pages serves this repo under /Portfolio
+          BASE_PATH: /Portfolio
 
-      # GitHub Pages serves the artifact as-is; .nojekyll stops Jekyll from
-      # dropping files and folders that begin with an underscore.
-      - run: touch dist/.nojekyll
+      # Next writes its chunks to _next/, and Jekyll drops paths that begin
+      # with an underscore unless .nojekyll is present.
+      - run: touch out/.nojekyll
 
       - uses: actions/configure-pages@v5
         with:
@@ -56,7 +59,7 @@ jobs:
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: out
 
   deploy:
     needs: build
