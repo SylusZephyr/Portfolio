@@ -21,12 +21,12 @@ function WordReveal({ text }: { text: string }) {
           initial={{ opacity: 0, y: 18, filter: 'blur(8px)' }}
           animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
           transition={{ duration: 0.5, delay: 0.25 + i * 0.045, ease: [0.22, 1, 0.36, 1] }}
-          // inline-block collapses a trailing space, so the gap between words
-          // has to be a margin rather than whitespace
-          style={spaced ? { marginRight: '0.26em' } : undefined}
-          className="inline-block text-slate-100"
+          // the space has to be a real character inside the span, kept by
+          // whitespace-pre: a margin would look right but leave the headline
+          // as one unbroken word for copy-paste and screen readers
+          className="inline-block whitespace-pre text-slate-100"
         >
-          {token}
+          {spaced ? `${token} ` : token}
         </motion.span>
       ))}
     </h1>
